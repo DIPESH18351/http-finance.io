@@ -16,10 +16,10 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-const frontendDomain = process.env.FRONTEND_DOMAIN || "http://localhost:5173";
+const frontendDomain = process.env.FRONTEND_DOMAIN || "https://http-finance-io.vercel.app";
 if (!process.env.FRONTEND_DOMAIN) {
   console.warn(
-    "FRONTEND_DOMAIN is not set. Defaulting CORS origin to http://localhost:5173"
+    "FRONTEND_DOMAIN is not set. Defaulting CORS origin to https://http-finance-io.vercel.app"
   );
 }
 
