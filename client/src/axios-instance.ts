@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const backend = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL,
+  baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:5000",
   timeout: 60000,
   headers: { "X-Custom-Header": "foobar" },
 });

@@ -21,3 +21,8 @@ export const updateAccount = async (data: updateAccountData) => {
   const res = await backend.patch("/accounts/update-account", data);
   return res.data;
 };
+
+export const deleteAccount = async (accountId: string) => {
+  const res = await backend.delete(`/accounts/delete-account/${accountId}`);
+  return res.data;
+};

@@ -24,8 +24,10 @@ const SignInPage = () => {
       return;
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     signInMutation.mutate(
-      { email, password },
+      { email: normalizedEmail, password },
       {
         onSuccess: (data) => {
           login(data.token, data.user);
@@ -33,8 +35,13 @@ const SignInPage = () => {
           navigate("/dashboard");
         },
         onError: (error: unknown) => {
-          const err = error as { response?: { data?: { error?: string } } };
-          toast.error(err.response?.data?.error || "Invalid email or password");
+          const err = error as {
+            message?: string;
+            response?: { data?: { error?: string } };
+          };
+          toast.error(
+            err.response?.data?.error || err.message || "Failed to sign in"
+          );
         },
       }
     );

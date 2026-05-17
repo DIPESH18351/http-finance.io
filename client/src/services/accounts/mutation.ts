@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { toast } from "sonner";
-import { createAccount, updateAccount } from "./api";
+import { createAccount, updateAccount, deleteAccount } from "./api";
 import { CreateAccountData, updateAccountData } from "@/types";
 
 export const useCreateAccount = () => {
@@ -35,6 +35,24 @@ export const useUpdateAccount = () => {
     },
     onError: (data: any) => {
       toast.error(data?.response?.data?.error);
+    },
+  });
+};
+
+export const useDeleteAccount = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (accountId: string) => deleteAccount(accountId),
+    onSuccess: (data) => {
+      toast.success(data.message);
+      // Invalidate queries to refresh the accounts list
+      queryClient.invalidateQueries({
+        queryKey: ["getAllAccounts"],
+      });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.error || "Failed to delete account");
+      console.log(err);
     },
   });
 };

@@ -6,7 +6,9 @@ const SALT_ROUNDS = 10;
 
 export const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const name = req.body.name?.trim();
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password;
 
     // Validate required fields
     if (!name || !email || !password) {
@@ -20,9 +22,35 @@ export const signup = async (req, res) => {
       where: { email },
     });
 
+    // If user exists but has no password, allow setting a password
     if (existingUser) {
-      return res.status(409).json({
-        error: "User with this email already exists",
+      if (existingUser.password) {
+        return res.status(409).json({
+          error: "User with this email already exists",
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+      const updatedUser = await prisma.user.update({
+        where: { email },
+        data: {
+          name,
+          password: hashedPassword,
+        },
+      });
+
+      const token = jwt.sign(
+        { userId: updatedUser.id, email: updatedUser.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      const { password: _, ...userWithoutPassword } = updatedUser;
+
+      return res.status(200).json({
+        message: "Password set successfully",
+        user: userWithoutPassword,
+        token,
       });
     }
 
@@ -61,7 +89,8 @@ export const signup = async (req, res) => {
 
 export const signin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password;
 
     // Validate required fields
     if (!email || !password) {
@@ -75,9 +104,10 @@ export const signin = async (req, res) => {
       where: { email },
     });
 
-    if (!user) {
+    if (!user || !user.password) {
       return res.status(401).json({
-        error: "Invalid email or password",
+        error:
+          "Invalid email or password. If you signed up via Clerk, please use that login method.",
       });
     }
 

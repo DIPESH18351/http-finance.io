@@ -13,20 +13,20 @@ import rateLimiter from "../middlewares/rateLimiter.js";
 
 const router = express.Router();
 
-router.post("/create-transaction", rateLimiter(2), createTransaction);
+router.post("/create-transaction", rateLimiter(1), createTransaction);
 router.patch(
   "/update-transaction/:transactionId",
-  rateLimiter(2),
+  rateLimiter(1),
   editTransaction
 );
 router.delete(
   "/delete-transaction/:transactionId",
-  rateLimiter(2),
+  rateLimiter(1),
   deleteTransaction
 );
 router.delete(
   "/delete-transactions",
-  rateLimiter(5),
+  rateLimiter(2),
   deleteMultipleTransactions
 );
 router.get("/filter", getFilteredTransactions);

@@ -1,5 +1,5 @@
 import { AccountType } from "@/types";
-import { Loader2, Plus, Wallet } from "lucide-react";
+import { Loader2, Plus, Wallet, Trash2 } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import {
@@ -24,8 +24,19 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { useUserContext } from "@/contexts/userContext";
-import { useCreateAccount } from "@/services/accounts/mutation";
+import { useCreateAccount, useDeleteAccount } from "@/services/accounts/mutation";
 import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface props {
   accounts: AccountType[];
@@ -49,6 +60,8 @@ const Accounts = ({ accounts, accountsLoading, onAccountClick }: props) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { mutate: createAccount, isPending: creatingAccount } =
     useCreateAccount();
+  const { mutate: deleteAccount, isPending: deletingAccount } =
+    useDeleteAccount();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,6 +83,14 @@ const Accounts = ({ accounts, accountsLoading, onAccountClick }: props) => {
       }
     );
   }
+
+  const handleDeleteAccount = (accountId: string) => {
+    deleteAccount(accountId, {
+      onSuccess: () => {
+        // Account deleted successfully
+      },
+    });
+  };
 
   if (accountsLoading) {
     return (
@@ -253,6 +274,46 @@ const Accounts = ({ accounts, accountsLoading, onAccountClick }: props) => {
                 >
                   View Transactions
                 </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 ml-2"
+                      disabled={deletingAccount}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Account</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{account.name}"? This action cannot be undone.
+                        <br />
+                        <br />
+                        <strong>Note:</strong> You can only delete accounts that have no transactions.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDeleteAccount(account.id)}
+                        className="bg-red-600 hover:bg-red-700"
+                        disabled={deletingAccount}
+                      >
+                        {deletingAccount ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Deleting...
+                          </>
+                        ) : (
+                          "Delete Account"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}

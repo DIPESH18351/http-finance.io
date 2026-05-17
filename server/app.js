@@ -15,9 +15,17 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+
+const frontendDomain = process.env.FRONTEND_DOMAIN || "http://localhost:5173";
+if (!process.env.FRONTEND_DOMAIN) {
+  console.warn(
+    "FRONTEND_DOMAIN is not set. Defaulting CORS origin to http://localhost:5173"
+  );
+}
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_DOMAIN,
+    origin: frontendDomain,
     methods: "GET,POST,PUT,DELETE,PATCH",
     credentials: true,
   })
